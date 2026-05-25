@@ -33,7 +33,7 @@ Exemplo:
 Valor salvo no banco:
 
 ```txt id="g6mztf"
-1468000
+14680000
 ```
 
 O banco é identificado automaticamente através do:
