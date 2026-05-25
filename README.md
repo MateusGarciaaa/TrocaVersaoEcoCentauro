@@ -104,9 +104,7 @@ Exemplo:
 C:\ecosis\windows\versões\1.4.680\
 │
 ├── 01.exe
-├── 02.exe
-├── eco_novo.exe
-└── eco_antigo.exe
+└── 02.exe
 ```
 
 Tudo que estiver dentro da pasta da versão aparecerá no campo de builds da aplicação.
