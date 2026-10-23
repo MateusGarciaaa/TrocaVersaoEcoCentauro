@@ -157,31 +157,6 @@ def gerar_versao_tgerlicenca(versao: str) -> int:
     return int(f"{versao_limpa}000")
 
 
-def versao_anterior_a_1_6(versao: str) -> bool:
-    """
-    Indica se a versão é 1.5 ou anterior (ou seja, menor que 1.6).
-
-    Exemplo
-    --------
-    1.4.680 -> True
-    1.5.000 -> True
-    1.6.000 -> False
-    """
-
-    partes = versao.replace(",", ".").split(".")
-
-    try:
-        major = int(partes[0])
-        minor = int(partes[1]) if len(partes) > 1 else 0
-
-    except ValueError:
-        raise Exception(
-            f"Formato de versão inválido: {versao}"
-        )
-
-    return (major, minor) < (1, 6)
-
-
 # ============================================
 # ATUALIZAR A VERSÃO DO BANCO
 # ============================================
@@ -189,50 +164,31 @@ def versao_anterior_a_1_6(versao: str) -> bool:
 def atualizar_versao_banco(versao: str) -> int:
     """
     Atualiza campo VERSAO da tabela TGERLICENCA.
-
-    Ao voltar para a versão 1.5 ou anterior, também
-    limpa o campo VERSAODB (NULL), que só existe a
-    partir da 1.6.
     """
 
     valor_versao = gerar_versao_tgerlicenca(
         versao
     )
 
-    limpar_versaodb = versao_anterior_a_1_6(versao)
-
     conexao = conectar_banco()
     cursor = conexao.cursor()
 
     try:
 
-        if limpar_versaodb:
-
-            cursor.execute(
-                """
-                UPDATE TGERLICENCA
-                SET VERSAO = ?,
-                    VERSAODB = NULL
-                """,
-                (valor_versao,)
-            )
-
-        else:
-
-            cursor.execute(
-                """
-                UPDATE TGERLICENCA
-                SET VERSAO = ?
-                """,
-                (valor_versao,)
-            )
+        cursor.execute(
+            """
+            UPDATE TGERLICENCA
+            SET VERSAO = ?,
+                VERSAODB = NULL
+            """,
+            (valor_versao,)
+        )
 
         conexao.commit()
 
         logging.info(
-            "Versão alterada para %s%s",
-            valor_versao,
-            " (VERSAODB = NULL)" if limpar_versaodb else ""
+            "Versão alterada para %s",
+            valor_versao
         )
 
         return valor_versao
@@ -631,14 +587,9 @@ class TelaPrincipal(QWidget):
             valor = atualizar_versao_banco(
                 versao
             )
-            mensagem = f"VERSAO alterada para:\n{valor}"
-
-            if versao_anterior_a_1_6(versao):
-                mensagem += "\n\nVERSAODB definido como NULL."
-
             exibir_sucesso(
                 self,
-                mensagem
+                f"VERSAO alterada para:\n{valor}"
             )
 
         except Exception as erro:
